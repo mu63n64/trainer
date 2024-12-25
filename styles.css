@@ -1,0 +1,116 @@
+* {
+	position: relative;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	bborder: 1px solid red;
+}
+html, body {
+	background-color: #031;
+	bborder: 1px solid blue;
+}
+.login {
+	color: #ccc;
+	align-items: center;
+	position: absolute;
+	display: flex;
+	flex-direction: column;
+	width: 15em;
+	height: 10em;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+div.header {
+	display: flex;
+	justify-content: space-between;
+	background-color: #153;
+	width: 100%;
+	height: 3em;
+	z-index: 100;
+}
+div.header div {
+	width: 5em;
+	border: 1px solid black;
+}
+div.subjectCard {
+	display: flex;
+	border-radius: 1em;
+	width: 25em;
+	height: 10em;
+	background-color: #666;
+	transition: transform 0.5s;
+}
+div.subjectCard:hover {
+	transform: scale(1.05);
+}
+div.cardFG {
+	background-color: #0038;
+	border-radius: 1em 0 0 1em;
+	width: 8em;
+}
+div.cardFG > p {
+	color: #ccc;
+	ttransform: translate(-50%, -50%) rotate(-90deg);
+}
+div.cardBG {
+	background-color: #6008;
+	border-radius: 0 1em 1em 0;
+	width: 17em;
+}
+div.cardContainer {
+	height: 90vh;
+	position: absolute;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-evenly;
+	align-items: center;
+}
+div.exerciseList {
+	height: 90vh;
+	position: absolute;
+	width: 100%;
+	visibility: hidden;
+}
+p.centered {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+button {
+	background-color: #153;
+	border: none;
+	border-radius: 1em;
+	padding: 0.5em;
+}
+button:hover {
+	background-color: #031;
+}
+.backdrop {
+	position: absolute;
+	inset: 0;
+	background-color: #0318;
+	visibility: hidden;
+	z-index: 50;
+}
+.profile {
+	position: absolute;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 20em;
+	height: 30em;
+	background-color: #153;
+	border-radius: 1em;
+	bborder: 1px solid yellow;
+}
+.trainer {
+	height: 95vh;
+	visibility: hidden;
+	bborder: 1px solid magenta;
+}
