@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+	<title>trainer</title>
+	<link rel="stylesheet" href="styles.css">
+	<script>
+	let create = tag => document.createElement(tag);
+	let div = value => `<div>${value}</div>`;
+	let divCls = (classArray, value) => `<div class='${classArray.join(' ')}'>${value}</div>`;
+	let pc = value => `<p class=centered>${value}</p>`;
+	let addTo = (a, bArray) => { for (let b of bArray) a.appendChild(b); }
+	let setVisibilityFor = (selector, state) => { document.querySelector(selector).style.visibility = state ? 'visible' : 'hidden'; }
+  
+	class Login {
+		constructor(userList) {
+			this.el = create('form');
+			this.el.classList.add('login');
+			this.el.innerHTML = 'login or register';
+      
+			this.u = create('input');
+			this.p = create('input');
+			this.logBtn = create('button');
+			this.regBtn = create('button');
+			this.logBtn.innerHTML = 'login';
+			this.regBtn.innerHTML = 'register';
+			this.logBtn.onclick = (e) => {
+				e.preventDefault();
+				if (!userList.some((entry) => entry[0] == this.u.value && entry[1] == this.p.value)) {
+					window.alert('wrong input');
+					return;
+				}
+			setVisibilityFor('.login', 0);
+			setVisibilityFor('.trainer', 1);
+			document.querySelector('#un').innerHTML = this.u.value;
+			document.querySelector('#pw').innerHTML = this.p.value;
+			};
+			this.regBtn.onclick = (e) => {
+				e.preventDefault();
+				if (userList.some((entry) => entry[0] == this.u.value)) {
+					window.alert('username taken');
+					return;
+				}
+				fetch('http://127.0.0.1:8000/api/Userlist', { 
+					method: 'POST',
+					body: JSON.stringify({
+						username: this.u.value,
+						password: this.p.value,
+					}),
+					headers: { 'Content-type': 'application/json; charset=UTF-8' }
+				})
+				setVisibilityFor('.login', 0);
+				setVisibilityFor('.trainer', 1);
+				document.querySelector('#un').innerHTML = this.u.value;
+				document.querySelector('#pw').innerHTML = this.p.value;
+			};
+			addTo(this.el, [this.u, this.p, this.logBtn, this.regBtn]);
+		}
+	}
+	class Header {
+		constructor(title, selectors) {
+			this.el = create('div');
+			this.el.classList.add('header');
+			this.el.innerHTML = div(pc(title));
+      
+			this.prfl = create('div');
+			this.prfl.innerHTML = pc('profile');
+			this.prflOpnd = false;
+			this.prfl.onclick = () => {
+				setVisibilityFor('.backdrop', this.prflOpnd ? 0 : 1);
+				this.prflOpnd = !this.prflOpnd;
+			};
+			addTo(this.el, [this.prfl]);
+		}
+	}
+  class SubjectCard {
+    constructor(title, xListSelector) {
+      this.el = create('div');
+      this.el.classList.add('subjectCard');
+      this.el.innerHTML = `
+        ${divCls(['cardFG'], pc(title))}
+        ${divCls(['cardBG'], '')}
+      `;
+      this.el.onclick = () => {
+        setVisibilityFor(xListSelector, 1);
+        setVisibilityFor('.cardContainer', 0);
+      };
+    }
+  }
+  class CardContainer {
+    constructor(cards) {
+      this.el = create('div');
+      this.el.classList.add('cardContainer');
+      
+      this.cards = cards.map(tns => new SubjectCard(tns[0], tns[1]));
+      addTo(this.el, this.cards.map(card => card.el));
+    }
+  }
+  class ExerciseOption {
+    constructor(opt, rightAns) {
+      this.el = create('div');
+      this.el.innerHTML = opt;
+      this.el.onclick = (e) => {
+        e.stopPropagation();
+        this.el.style.backgroundColor = opt == rightAns ? '#0f0' : '#f00';
+      };
+    }
+  }
+  class Exercise {
+    constructor(title, options, rightAns) {
+      this.t = title;
+      this.o = options;
+      this.r = rightAns;
+      this.state = 0;
+      
+      this.el = create('div');
+      this.setState(0);
+      this.el.onclick = () => { this.setState(1 - this.state); };
+    }
+    setState(newState) {
+      this.state = newState;
+      newState ? this.showExpanded() : this.showShort();
+    }
+    showShort() {
+      this.el.innerHTML = `${this.t} ${this.o} ${this.r}`;
+    }
+    showExpanded() {
+      this.el.innerHTML = div(this.t);
+      addTo(this.el, this.o.map(o => (new ExerciseOption(o, this.r)).el));
+    }
+  }
+  class ExerciseList {
+    constructor(id, exList) {
+      this.el = create('div');
+      this.el.classList.add('exerciseList');
+      this.el.id = id;
+      
+      this.xs = exList.map(x => new Exercise(x[0], x[2], x[3]));
+      addTo(this.el, this.xs.map(x => x.el));
+      
+      this.returnBtn = create('button');
+      this.returnBtn.onclick = () => {
+        setVisibilityFor('.cardContainer', 1);
+        setVisibilityFor('#' + this.el.id, 0);
+        for (let x of this.xs) x.setState(0);
+      };
+      this.returnBtn.innerHTML = 'Return';
+      addTo(this.el, [this.returnBtn]);
+    }
+  }
+	class Profile {
+		constructor() {
+			this.el = create('div');
+			this.el.classList.add('backdrop');
+			this.profile = create('div');
+			this.profile.classList.add('profile');
+	  
+			this.un = create('div');
+			this.pw = create('div');
+			this.un.id = 'un';
+			this.pw.id = 'pw';
+			this.un.innerHTML = 'John Doe';
+			this.pw.innerHTML = '12345678';
+			
+			this.edit = create('form');
+			this.editU = create('input');
+			this.editP = create('input');
+			this.submit = create('button');
+			this.submit.innerHTML = 'Edit info';
+			
+			this.submit.onclick = () => {
+				fetch(`http://127.0.0.1:8000/api/Userlist/${this.un.innerHTML}`, {
+					method: 'PUT',
+					body: JSON.stringify({
+						username: this.editU.value,
+						password: this.editP.value,
+					}),
+					headers: { 'Content-type': 'application/json; charset=UTF-8' }
+				})
+				.then(res => {
+					this.un.innerHTML = this.editU.value;
+					this.pw.innerHTML = this.editP.value;
+				});
+			};
+			addTo(this.el, [this.profile]);
+			addTo(this.profile, [this.un, this.pw]);
+			addTo(this.profile, [this.edit, this.editU, this.editP, this.submit]);
+		}
+	}
+	class Trainer {
+		constructor(exList) {
+			this.el = create('div');
+			this.el.classList.add('trainer');
+
+			this.h = new Header('Trainer™', ['.cardContainer', '.profile', '#mat', '#inf', '#eng']);
+			this.cc = new CardContainer([['Math', '#mat'], ['Informatics & IT', '#inf'], ['English', '#eng']]);
+			this.xls = [
+				new ExerciseList('mat', exList.filter(x => x[1] == 'mat')),
+				new ExerciseList('inf', exList.filter(x => x[1] == 'inf')),
+				new ExerciseList('eng', exList.filter(x => x[1] == 'eng')),
+			];
+			this.p = new Profile();
+			addTo(this.el, [this.h.el, this.cc.el, ...this.xls.map(xl => xl.el), this.p.el]);
+		}
+	}
+	</script>
+</head>
+<body>
+	<script>
+	fetch('http://127.0.0.1:8000/api/Userlist')
+	.then(response => response.json())
+	.then(us => {
+		let login = new Login(us.map(u => [u.username, u.password]));
+		addTo(document.querySelector('body'), [login.el]);
+	})
+	fetch('http://127.0.0.1:8000/api/Exerciselist')
+	.then(response => response.json())
+	.then(xs => {
+		let trainer = new Trainer(xs.map(x => [x.name, x.theme, x.options.split(', '), x.rightAns]));
+		addTo(document.querySelector('body'), [trainer.el]);
+	});
+	</script>
+</body>
+</html>
